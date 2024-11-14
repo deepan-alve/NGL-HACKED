@@ -1,3 +1,5 @@
-instagrapi
+requests
 python-dotenv
+airtable-python-wrapper
+instagrapi
 Pillow

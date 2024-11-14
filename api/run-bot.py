@@ -1,14 +1,18 @@
 from http.server import BaseHTTPRequestHandler
 import json
-from instagrapi import Client
 import os
 from dotenv import load_dotenv
+from airtable import Airtable
+from instagrapi import Client
 
 load_dotenv()
 
 IG_USERNAME = os.environ.get("IG_USERNAME")
 IG_PASSWORD = os.environ.get("IG_PASSWORD")
 IG_CREDENTIAL_PATH = "./ig_settings.json"
+AIRTABLE_API_KEY = os.environ.get("AIRTABLE_API_KEY")
+AIRTABLE_BASE_ID = "appcfPr9gkxX9wbty"
+AIRTABLE_TABLE_NAME = "Messages"
 
 class Bot:
     _cl = None
@@ -39,6 +43,20 @@ class handler(BaseHTTPRequestHandler):
         try:
             goodbot = Bot()
             viewers_full_names = goodbot.get_story_viewers()
+            
+            # Initialize Airtable client
+            at = Airtable(AIRTABLE_BASE_ID, AIRTABLE_API_KEY)
+            
+            # Check and update Airtable records
+            for viewer_name in viewers_full_names:
+                records = at.get(AIRTABLE_TABLE_NAME, filter_by_formula=f"FIND('{viewer_name}', {{User}})")
+                if records['records']:
+                    print(f"Found: {viewer_name}")
+                else:
+                    print(f"Not Found: {viewer_name}")
+                    at.create(AIRTABLE_TABLE_NAME, {"User": viewer_name})
+                    print(f"Added: {viewer_name}")
+
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
             self.end_headers()
