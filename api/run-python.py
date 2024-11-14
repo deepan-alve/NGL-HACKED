@@ -1,6 +1,7 @@
+from http.server import BaseHTTPRequestHandler
+import json
 from instagrapi import Client
 import os
-import json
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -33,22 +34,17 @@ class Bot:
             story_viewers_full_names.extend([viewer.full_name for viewer in viewers])
         return story_viewers_full_names
 
-def handler(request):
-    try:
-        goodbot = Bot()
-        viewers_full_names = goodbot.get_story_viewers()
-        return {
-            "statusCode": 200,
-            "body": json.dumps(viewers_full_names),
-            "headers": {
-                "Content-Type": "application/json"
-            }
-        }
-    except Exception as e:
-        return {
-            "statusCode": 500,
-            "body": json.dumps({"error": str(e)}),
-            "headers": {
-                "Content-Type": "application/json"
-            }
-        }
+class handler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        try:
+            goodbot = Bot()
+            viewers_full_names = goodbot.get_story_viewers()
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps(viewers_full_names).encode())
+        except Exception as e:
+            self.send_response(500)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps({"error": str(e)}).encode())
