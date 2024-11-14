@@ -38,7 +38,6 @@ export default function handler(req, res) {
                         }
                     }]);
                     console.log(`Added: ${viewerName}`);
-                    process.exit(0);
                 }
             }
             res.status(200).send('Script executed successfully');
