@@ -34,9 +34,21 @@ class Bot:
         return story_viewers_full_names
 
 def handler(request):
-    goodbot = Bot()
-    viewers_full_names = goodbot.get_story_viewers()
-    return {
-        "statusCode": 200,
-        "body": json.dumps(viewers_full_names)
-    }
+    try:
+        goodbot = Bot()
+        viewers_full_names = goodbot.get_story_viewers()
+        return {
+            "statusCode": 200,
+            "body": json.dumps(viewers_full_names),
+            "headers": {
+                "Content-Type": "application/json"
+            }
+        }
+    except Exception as e:
+        return {
+            "statusCode": 500,
+            "body": json.dumps({"error": str(e)}),
+            "headers": {
+                "Content-Type": "application/json"
+            }
+        }
