@@ -16,7 +16,7 @@ if (!apiKey) {
 const base = new Airtable({ apiKey }).base('appcfPr9gkxX9wbty');
 
 export default function handler(req, res) {
-    const pythonProcess = spawn('python3', ['./view.py']);
+const pythonProcess = spawn('python', ['./view.py']);
 
     pythonProcess.stdout.on('data', async (data) => {
         try {
