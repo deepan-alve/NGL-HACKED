@@ -15,7 +15,7 @@ const base = new Airtable({ apiKey }).base('appcfPr9gkxX9wbty');
 
 export default async function handler(req, res) {
     try {
-        const response = await fetch('https://your-vercel-project.vercel.app/api/run-python');
+        const response = await fetch('https://ngl-remake-live-test.vercel.app/api/run-python');
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
