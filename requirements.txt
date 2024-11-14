@@ -1,2 +1,3 @@
 instagrapi
 python-dotenv
+Pillow
