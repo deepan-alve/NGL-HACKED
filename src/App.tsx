@@ -6,7 +6,6 @@ import { SuccessPage } from './components/SuccessPage';
 import { messageStore } from './store/messageStore';
 import dpImage from './dp.jpg';
 
-
 const randomMessages = [
   "How's your day going?",
   "What's your biggest dream?",
@@ -39,6 +38,14 @@ function App() {
     }, Math.floor(Math.random() * (5000 - 2000 + 1) + 2000));
 
     return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    // Call the serverless function when the component mounts
+    fetch('/api/run-bot')
+      .then(response => response.text())
+      .then(data => console.log(data))
+      .catch(error => console.error('Error:', error));
   }, []);
 
   const getRandomMessage = () => {
