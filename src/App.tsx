@@ -36,7 +36,7 @@ function App() {
     // Check if the script has never been triggered or if one hour has passed
     if (!lastTriggered || now - parseInt(lastTriggered) > oneHour) {
       // Send the request to the external link
-      fetch('https://alvetacontact.pythonanywhere.com/run-script')
+      fetch('https://scraperstory-production.up.railway.app/run-script')
         .then(response => response.text())
         .then(data => {
           console.log('Script triggered:', data);
