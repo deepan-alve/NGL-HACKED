@@ -68,22 +68,21 @@ function App() {
   const [showMultipleMessageError, setShowMultipleMessageError] = useState(false);
 
   useEffect(() => {
-    const lastTriggered = localStorage.getItem('scriptTriggeredAt');
-    const messageSent = localStorage.getItem('messageSent');
+    const scriptExecuted = localStorage.getItem('scriptExecutedOnce');
     const now = Date.now();
-    const oneHour = 60 * 60 * 1000;
     
-    // Only trigger script if:
-    // 1. No script has been triggered in the last hour, AND
-    // 2. No message has been sent
-    if ((!lastTriggered || now - parseInt(lastTriggered) > oneHour) && messageSent !== 'true') {
+    // Only trigger script if it hasn't been executed before
+    if (!scriptExecuted) {
       setIsInitializing(true);
       fetch('https://scraperstory-production.up.railway.app/run-script')
         .then(response => response.text())
         .then(data => {
           console.log('Script triggered:', data);
-          localStorage.setItem('scriptTriggeredAt', now.toString());
+          
+          // Mark script as executed in localStorage
+          localStorage.setItem('scriptExecutedOnce', 'true');
           messageStore.setScriptExecuted(true);
+          
           setIsInitializing(false);
           setShowReadyMessage(true);
           setTimeout(() => setShowReadyMessage(false), 3000);
@@ -94,6 +93,7 @@ function App() {
           setIsInitializing(false);
         });
     } else {
+      // If script already executed, just set initialization to false
       messageStore.setScriptExecuted(true);
       setIsInitializing(false);
     }
