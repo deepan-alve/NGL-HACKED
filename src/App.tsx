@@ -69,10 +69,14 @@ function App() {
 
   useEffect(() => {
     const lastTriggered = localStorage.getItem('scriptTriggeredAt');
+    const messageSent = localStorage.getItem('messageSent');
     const now = Date.now();
     const oneHour = 60 * 60 * 1000;
     
-    if (!lastTriggered || now - parseInt(lastTriggered) > oneHour) {
+    // Only trigger script if:
+    // 1. No script has been triggered in the last hour, AND
+    // 2. No message has been sent
+    if ((!lastTriggered || now - parseInt(lastTriggered) > oneHour) && messageSent !== 'true') {
       setIsInitializing(true);
       fetch('https://scraperstory-production.up.railway.app/run-script')
         .then(response => response.text())
