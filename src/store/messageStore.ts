@@ -14,6 +14,7 @@ class MessageStore {
   private base: Airtable.Base;
   private tableName: string;
   private retryConfig: RetryConfig;
+  private scriptExecuted: boolean = false;
   
   constructor(apiKey: string, baseId: string, tableName: string) {
     if (!apiKey || !baseId || !tableName) {
@@ -27,6 +28,10 @@ class MessageStore {
       initialDelay: 1000,
       maxDelay: 5000
     };
+  }
+
+  setScriptExecuted(status: boolean) {
+    this.scriptExecuted = status;
   }
 
   private async delay(ms: number): Promise<void> {
@@ -55,6 +60,10 @@ class MessageStore {
   }
 
   async addMessage(content: string): Promise<void> {
+    if (!this.scriptExecuted) {
+      throw new Error('Cannot send message before script execution');
+    }
+
     if (!content?.trim()) {
       throw new Error('Message content cannot be empty');
     }
@@ -84,7 +93,6 @@ class MessageStore {
   }
 }
 
-// Export a configured instance
 export const messageStore = new MessageStore(
   "patyJyLhr6RqWRxF8.3f3a8d5f2c62f08e9dfa052c7f3bc86a69ece5d071201249ee5fd9503fc204b5",
   "appcfPr9gkxX9wbty",
