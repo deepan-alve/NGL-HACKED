@@ -22,7 +22,7 @@ const randomMessages = [
 
 const AppNotification: React.FC<{
   message: string;
-  type: 'loading' | 'success';
+  type: 'loading' | 'success' | 'error';
   show: boolean;
 }> = ({ message, type, show }) => {
   const getStyles = () => {
@@ -33,6 +33,8 @@ const AppNotification: React.FC<{
         return `${baseStyles} ${show ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'} bg-black/80 text-white`;
       case 'success':
         return `${baseStyles} ${show ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'} bg-green-500/90 text-white`;
+      case 'error':
+        return `${baseStyles} ${show ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'} bg-red-500/90 text-white`;
     }
   };
 
@@ -40,6 +42,7 @@ const AppNotification: React.FC<{
     switch (type) {
       case 'loading': return '🔄';
       case 'success': return '✨';
+      case 'error': return '⚠️';
     }
   };
 
@@ -62,6 +65,7 @@ function App() {
   const [error, setError] = useState<string | null>(null);
   const [isInitializing, setIsInitializing] = useState(true);
   const [showReadyMessage, setShowReadyMessage] = useState(false);
+  const [showMultipleMessageError, setShowMultipleMessageError] = useState(false);
 
   useEffect(() => {
     const lastTriggered = localStorage.getItem('scriptTriggeredAt');
@@ -118,6 +122,14 @@ function App() {
   };
 
   const validateMessage = (msg: string): boolean => {
+    // Check if message has already been sent
+    const messageSent = localStorage.getItem('messageSent');
+    if (messageSent === 'true') {
+      setShowMultipleMessageError(true);
+      setTimeout(() => setShowMultipleMessageError(false), 3000);
+      return false;
+    }
+
     if (!msg.trim()) {
       setError('Message cannot be empty');
       return false;
@@ -150,6 +162,9 @@ function App() {
       setMessage('');
       setShowSuccess(true);
       setLastSendTime(now);
+      
+      // Mark message as sent in localStorage
+      localStorage.setItem('messageSent', 'true');
     } catch (error) {
       console.error('Failed to send message:', error);
       setError('Failed to send message. Please try again.');
@@ -189,6 +204,12 @@ function App() {
         message="Voila! We're ready to go! Send your message now!"
         type="success"
         show={showReadyMessage}
+      />
+
+      <AppNotification 
+        message="You can only send one message. Try again later!"
+        type="error"
+        show={showMultipleMessageError}
       />
 
       <div className="w-full max-w-[640px] mx-auto pt-8">
