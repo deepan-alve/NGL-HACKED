@@ -207,7 +207,7 @@ function App() {
       />
 
       <AppNotification 
-        message="You can only send one message. Try again later!"
+        message="The user has only allowed one question per person!"
         type="error"
         show={showMultipleMessageError}
       />
