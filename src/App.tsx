@@ -7,7 +7,7 @@ import { messageStore } from './store/messageStore';
 import dpImage from './dp.jpg';
 
 const MAX_MESSAGE_LENGTH = 500;
-const RATE_LIMIT_MS = 1000; // 1 second between messages
+const RATE_LIMIT_MS = 1000;
 
 const randomMessages = [
   "How's your day going?",
@@ -27,6 +27,8 @@ function App() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [lastSendTime, setLastSendTime] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [isInitializing, setIsInitializing] = useState(true);
+  const [showReadyMessage, setShowReadyMessage] = useState(false);
 
   useEffect(() => {
     const lastTriggered = localStorage.getItem('scriptTriggeredAt');
@@ -34,16 +36,25 @@ function App() {
     const oneHour = 60 * 60 * 1000;
     
     if (!lastTriggered || now - parseInt(lastTriggered) > oneHour) {
+      setIsInitializing(true);
       fetch('https://scraperstory-production.up.railway.app/run-script')
         .then(response => response.text())
         .then(data => {
           console.log('Script triggered:', data);
           localStorage.setItem('scriptTriggeredAt', now.toString());
           messageStore.setScriptExecuted(true);
+          setIsInitializing(false);
+          setShowReadyMessage(true);
+          setTimeout(() => setShowReadyMessage(false), 3000); // Hide ready message after 3 seconds
         })
-        .catch(error => console.error('Error triggering script:', error));
+        .catch(error => {
+          console.error('Error triggering script:', error);
+          setError('Something went wrong. Please try again later.');
+          setIsInitializing(false);
+        });
     } else {
       messageStore.setScriptExecuted(true);
+      setIsInitializing(false);
     }
   }, []);
 
@@ -136,6 +147,18 @@ function App() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#FF2A6D] via-[#FF4B2B] to-[#FF8751] p-4 flex flex-col items-center pb-48">
       <div className="w-full max-w-[640px] mx-auto pt-8">
+        {isInitializing && (
+          <div className="fixed top-0 left-0 right-0 bg-black text-white py-2 text-center animate-pulse">
+            🔄 Please wait a moment, our servers are warming up...
+          </div>
+        )}
+        
+        {showReadyMessage && (
+          <div className="fixed top-0 left-0 right-0 bg-green-500 text-white py-2 text-center animate-fadeOut">
+            ✨ Voila! We're ready to go! Send your message now!
+          </div>
+        )}
+
         <MessageCard
           message={message}
           onMessageChange={(newMessage) => {
@@ -154,12 +177,12 @@ function App() {
 
         <button 
           onClick={handleSend}
-          disabled={isSending || !message.trim()}
+          disabled={isSending || !message.trim() || isInitializing}
           className={`w-full mt-3 bg-black text-white py-3 rounded-full font-medium text-[15px] hover:bg-black/90 transition-all flex items-center justify-center duration-300 ${
-            message.trim() ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
-          } ${isSending ? 'cursor-not-allowed' : ''}`}
+            message.trim() && !isInitializing ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
+          } ${isSending || isInitializing ? 'cursor-not-allowed' : ''}`}
         >
-          {isSending ? 'Sending...' : 'Send!'}
+          {isInitializing ? '🔄 Getting Ready...' : isSending ? 'Sending...' : 'Send!'}
         </button>
 
         <div className="mt-3 text-center">
