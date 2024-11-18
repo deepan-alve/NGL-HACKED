@@ -4,12 +4,10 @@ import { MessageCard } from './components/MessageCard';
 import { Footer } from './components/Footer';
 import { SuccessPage } from './components/SuccessPage';
 import { messageStore } from './store/messageStore';
-import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction } from '@/components/ui/alert-dialog';
 import dpImage from './dp.jpg';
 
 const MAX_MESSAGE_LENGTH = 500;
 const RATE_LIMIT_MS = 1000;
-const COOLDOWN_PERIOD = 60 * 60 * 1000; // 1 hour in milliseconds
 
 const randomMessages = [
   "How's your day going?",
@@ -31,8 +29,6 @@ function App() {
   const [error, setError] = useState<string | null>(null);
   const [isInitializing, setIsInitializing] = useState(true);
   const [showReadyMessage, setShowReadyMessage] = useState(false);
-  const [showCooldownAlert, setShowCooldownAlert] = useState(false);
-  const [timeRemaining, setTimeRemaining] = useState<string>('');
 
   useEffect(() => {
     const lastTriggered = localStorage.getItem('scriptTriggeredAt');
@@ -49,7 +45,7 @@ function App() {
           messageStore.setScriptExecuted(true);
           setIsInitializing(false);
           setShowReadyMessage(true);
-          setTimeout(() => setShowReadyMessage(false), 3000);
+          setTimeout(() => setShowReadyMessage(false), 3000); // Hide ready message after 3 seconds
         })
         .catch(error => {
           console.error('Error triggering script:', error);
@@ -82,26 +78,6 @@ function App() {
       .catch(error => console.error('Error:', error));
   }, []);
 
-  const formatTimeRemaining = (milliseconds: number): string => {
-    const minutes = Math.floor(milliseconds / 60000);
-    const seconds = Math.floor((milliseconds % 60000) / 1000);
-    return `${minutes} minutes and ${seconds} seconds`;
-  };
-
-  const checkCooldown = (): boolean => {
-    const lastMessageTime = parseInt(localStorage.getItem('lastMessageTime') || '0');
-    const now = Date.now();
-    const timeSinceLastMessage = now - lastMessageTime;
-    
-    if (lastMessageTime && timeSinceLastMessage < COOLDOWN_PERIOD) {
-      const remainingTime = COOLDOWN_PERIOD - timeSinceLastMessage;
-      setTimeRemaining(formatTimeRemaining(remainingTime));
-      setShowCooldownAlert(true);
-      return false;
-    }
-    return true;
-  };
-
   const getRandomMessage = () => {
     const randomIndex = Math.floor(Math.random() * randomMessages.length);
     setMessage(randomMessages[randomIndex]);
@@ -123,10 +99,6 @@ function App() {
   const handleSend = async () => {
     setError(null);
 
-    if (!checkCooldown()) {
-      return;
-    }
-
     const now = Date.now();
     if (now - lastSendTime < RATE_LIMIT_MS) {
       setError('Please wait a moment before sending another message');
@@ -142,7 +114,6 @@ function App() {
     setIsSending(true);
     try {
       await messageStore.addMessage(message.trim());
-      localStorage.setItem('lastMessageTime', Date.now().toString());
       setMessage('');
       setShowSuccess(true);
       setLastSendTime(now);
@@ -223,22 +194,6 @@ function App() {
       </div>
 
       <Footer tapCount={tapCount} />
-
-      <AlertDialog open={showCooldownAlert} onOpenChange={setShowCooldownAlert}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Cooldown Period Active</AlertDialogTitle>
-            <AlertDialogDescription>
-              You've already sent a message! Please wait {timeRemaining} before sending another message.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction onClick={() => setShowCooldownAlert(false)}>
-              Got it!
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }
