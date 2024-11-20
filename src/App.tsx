@@ -8,7 +8,7 @@ import dpImage from './dp.jpg';
 
 const MAX_MESSAGE_LENGTH = 500;
 const RATE_LIMIT_MS = 1000;
-const TWO_HOURS_MS = 2 * 60 * 60 * 1000; // 2 hours in milliseconds
+const TWO_HOURS_MS = 0.5 * 60 * 60 * 1000; // 2 hours in milliseconds
 
 const randomMessages = [
   "How's your day going?",
