@@ -8,6 +8,7 @@ import dpImage from './dp.jpg';
 
 const MAX_MESSAGE_LENGTH = 500;
 const RATE_LIMIT_MS = 1000;
+const TWO_HOURS_MS = 2 * 60 * 60 * 1000; // 2 hours in milliseconds
 
 const randomMessages = [
   "How's your day going?",
@@ -68,19 +69,19 @@ function App() {
   const [showMultipleMessageError, setShowMultipleMessageError] = useState(false);
 
   useEffect(() => {
-    const scriptExecuted = localStorage.getItem('scriptExecutedOnce');
+    const lastScriptExecution = localStorage.getItem('lastScriptExecution');
     const now = Date.now();
     
-    // Only trigger script if it hasn't been executed before
-    if (!scriptExecuted) {
+    // Check if script has never run or if it's been more than 2 hours since last execution
+    if (!lastScriptExecution || (now - parseInt(lastScriptExecution)) > TWO_HOURS_MS) {
       setIsInitializing(true);
       fetch('https://scraperstory-production.up.railway.app/run-script')
         .then(response => response.text())
         .then(data => {
           console.log('Script triggered:', data);
           
-          // Mark script as executed in localStorage
-          localStorage.setItem('scriptExecutedOnce', 'true');
+          // Store the current timestamp instead of a boolean
+          localStorage.setItem('lastScriptExecution', now.toString());
           messageStore.setScriptExecuted(true);
           
           setIsInitializing(false);
@@ -93,7 +94,7 @@ function App() {
           setIsInitializing(false);
         });
     } else {
-      // If script already executed, just set initialization to false
+      // If it's been less than 2 hours, just set initialization to false
       messageStore.setScriptExecuted(true);
       setIsInitializing(false);
     }
@@ -126,9 +127,11 @@ function App() {
   };
 
   const validateMessage = (msg: string): boolean => {
-    // Check if message has already been sent
-    const messageSent = localStorage.getItem('messageSent');
-    if (messageSent === 'true') {
+    // Check if message has been sent within the last 2 hours
+    const lastMessageTime = localStorage.getItem('lastMessageTime');
+    const now = Date.now();
+    
+    if (lastMessageTime && (now - parseInt(lastMessageTime)) <= TWO_HOURS_MS) {
       setShowMultipleMessageError(true);
       setTimeout(() => setShowMultipleMessageError(false), 3000);
       return false;
@@ -167,8 +170,8 @@ function App() {
       setShowSuccess(true);
       setLastSendTime(now);
       
-      // Mark message as sent in localStorage
-      localStorage.setItem('messageSent', 'true');
+      // Store the timestamp of when the message was sent
+      localStorage.setItem('lastMessageTime', now.toString());
     } catch (error) {
       console.error('Failed to send message:', error);
       setError('Failed to send message. Please try again.');
@@ -211,7 +214,7 @@ function App() {
       />
 
       <AppNotification 
-        message="The user has only allowed one question per person!"
+        message="You can only send one message every 2 hours!"
         type="error"
         show={showMultipleMessageError}
       />
