@@ -214,7 +214,7 @@ function App() {
       />
 
       <AppNotification 
-        message="You can only send one message every 2 hours!"
+        message=" Error : You can send only one messgae per day!"
         type="error"
         show={showMultipleMessageError}
       />
