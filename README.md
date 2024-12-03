@@ -1,5 +1,6 @@
 
 # Anonymous Message Sender 📬
+![sddefault](https://github.com/user-attachments/assets/a27b3584-601e-417c-858e-bbc5e7c36369)
 
 A modern web application that allows users to send anonymous messages, built with **React**, **TypeScript**, and **Tailwind CSS**. 🚀
 
