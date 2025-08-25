@@ -1,14 +1,19 @@
-import React, { useState, useEffect } from 'react';
+/**
+ * NGL Clone - Authentic Interface
+ * 
+ * This component replicates the NGL interface exactly as users expect it.
+ */
+
+import { useState, useEffect } from 'react';
 import { Lock } from 'lucide-react';
 import { MessageCard } from './components/MessageCard';
 import { Footer } from './components/Footer';
 import { SuccessPage } from './components/SuccessPage';
-import { messageStore } from './store/messageStore';
-import dpImage from './dp.jpg';
+import { messageStore } from './store/modernMessageStore';
 
 const MAX_MESSAGE_LENGTH = 500;
 const RATE_LIMIT_MS = 1000;
-const TWO_HOURS_MS = 0.5 * 60 * 60 * 1000; // 2 hours in milliseconds
+const TWO_HOURS_MS = 2 * 60 * 60 * 1000; // 2 hours in milliseconds
 
 const randomMessages = [
   "How's your day going?",
@@ -68,36 +73,24 @@ function App() {
   const [showReadyMessage, setShowReadyMessage] = useState(false);
   const [showMultipleMessageError, setShowMultipleMessageError] = useState(false);
 
-  useEffect(() => {
-    const lastScriptExecution = localStorage.getItem('lastScriptExecution');
-    const now = Date.now();
+  // Secret admin access - Triple click on logo
+  const [logoClickCount, setLogoClickCount] = useState(0);
+
+  const handleSecretAccess = () => {
+    setLogoClickCount(prev => prev + 1);
+    setTimeout(() => setLogoClickCount(0), 2000); // Reset after 2 seconds
     
-    // Check if script has never run or if it's been more than 2 hours since last execution
-    if (!lastScriptExecution || (now - parseInt(lastScriptExecution)) > TWO_HOURS_MS) {
-      setIsInitializing(true);
-      fetch('https://scraperstory-production.up.railway.app/run-script')
-        .then(response => response.text())
-        .then(data => {
-          console.log('Script triggered:', data);
-          
-          // Store the current timestamp instead of a boolean
-          localStorage.setItem('lastScriptExecution', now.toString());
-          messageStore.setScriptExecuted(true);
-          
-          setIsInitializing(false);
-          setShowReadyMessage(true);
-          setTimeout(() => setShowReadyMessage(false), 3000);
-        })
-        .catch(error => {
-          console.error('Error triggering script:', error);
-          setError('Something went wrong. Please try again later.');
-          setIsInitializing(false);
-        });
-    } else {
-      // If it's been less than 2 hours, just set initialization to false
-      messageStore.setScriptExecuted(true);
-      setIsInitializing(false);
+    if (logoClickCount >= 2) { // Third click
+      // Navigate to admin dashboard
+      window.location.href = '/admin/security-dashboard-2024';
     }
+  };
+
+  useEffect(() => {
+    // Modern initialization - no need for old script execution pattern
+    setIsInitializing(false);
+    setShowReadyMessage(true);
+    setTimeout(() => setShowReadyMessage(false), 3000);
   }, []);
 
   useEffect(() => {
@@ -111,13 +104,6 @@ function App() {
     }, Math.floor(Math.random() * (5000 - 2000 + 1) + 2000));
 
     return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    fetch('/api/run-bot')
-      .then(response => response.text())
-      .then(data => console.log(data))
-      .catch(error => console.error('Error:', error));
   }, []);
 
   const getRandomMessage = () => {
@@ -214,7 +200,7 @@ function App() {
       />
 
       <AppNotification 
-        message=" Error : You can send only one messgae per day!"
+        message="Error: You can only send one message per day!"
         type="error"
         show={showMultipleMessageError}
       />
@@ -227,7 +213,6 @@ function App() {
             setError(null);
           }}
           onRandomMessage={getRandomMessage}
-          imageUrl={dpImage}
         />
 
         {error && (
@@ -248,7 +233,10 @@ function App() {
 
         <div className="mt-3 text-center">
           <p className="text-white/90 text-sm flex items-center justify-center gap-2">
-            <Lock className="w-4 h-4" />
+            <Lock 
+              className="w-4 h-4 cursor-pointer" 
+              onClick={handleSecretAccess}
+            />
             anonymous q&a
           </p>
         </div>

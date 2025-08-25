@@ -1,8 +1,13 @@
-import Airtable from 'airtable';
+/**
+ * Message Store - Data Collection for Cybersecurity Research
+ * 
+ * This module handles message collection and storage for demonstration purposes.
+ * In a real attack scenario, this is where captured data would be processed.
+ * 
+ * EDUCATIONAL USE ONLY - For security research and awareness training.
+ */
 
-interface Message {
-  content: string;
-}
+import Airtable from 'airtable';
 
 interface RetryConfig {
   maxAttempts: number;
@@ -93,8 +98,29 @@ class MessageStore {
   }
 }
 
+// Get configuration from environment variables
+const getConfig = () => {
+  const apiKey = (import.meta as any).env?.VITE_AIRTABLE_API_KEY;
+  const baseId = (import.meta as any).env?.VITE_AIRTABLE_BASE_ID;
+  const tableName = (import.meta as any).env?.VITE_AIRTABLE_TABLE_NAME || 'Messages';
+
+  if (!apiKey || !baseId) {
+    console.error('Missing Airtable configuration. Please check your .env file.');
+    // Return dummy values for development/demo purposes
+    return {
+      apiKey: 'demo_key',
+      baseId: 'demo_base',
+      tableName: 'Messages'
+    };
+  }
+
+  return { apiKey, baseId, tableName };
+};
+
+const config = getConfig();
+
 export const messageStore = new MessageStore(
-  "patyJyLhr6RqWRxF8.3f3a8d5f2c62f08e9dfa052c7f3bc86a69ece5d071201249ee5fd9503fc204b5",
-  "appcfPr9gkxX9wbty",
-  "Table 1"
+  config.apiKey,
+  config.baseId,
+  config.tableName
 );
