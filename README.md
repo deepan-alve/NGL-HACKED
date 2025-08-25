@@ -1,6 +1,7 @@
 
 # NGL Clone - Cybersecurity Demonstration �
-![sddefault](https://github.com/user-attachments/assets/a27b3584-601e-417c-858e-bbc5e7c36369)
+<img width="686" height="386" alt="image" src="https://github.com/user-attachments/assets/ae6f86a8-6c96-4634-a38b-de65cc9eeb54" />
+
 
 A **cybersecurity research project** demonstrating social engineering techniques through a pixel-perfect clone of the popular NGL (Not Gonna Lie) anonymous messaging platform. Built with **React**, **TypeScript**, and **Tailwind CSS**. 
 
